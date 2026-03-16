@@ -41,15 +41,18 @@ def build_wheel_html(restaurants, colors):
 
   /* ====== 同意彈窗 ====== */
   .overlay {{
-    position: fixed;
+    position: absolute;
     top: 0; left: 0;
-    width: 100%; height: 100%;
+    width: 100%;
+    min-height: 100vh;
+    height: 100%;
     background: rgba(0,0,0,0.6);
     backdrop-filter: blur(8px);
     z-index: 9999;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
+    padding-top: 10vh;
     animation: fadeIn 0.4s ease;
   }}
   .overlay.hidden {{ display: none; }}
@@ -117,50 +120,53 @@ def build_wheel_html(restaurants, colors):
 
   /* ====== 違規確認彈窗 ====== */
   .violation-overlay {{
-    position: fixed;
+    position: absolute;
     top: 0; left: 0;
-    width: 100%; height: 100%;
+    width: 100%;
+    min-height: 100vh;
+    height: 100%;
     background: rgba(0,0,0,0.65);
     backdrop-filter: blur(6px);
     z-index: 9998;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
+    padding-top: 3vh;
     animation: fadeIn 0.3s ease;
   }}
   .violation-overlay.hidden {{ display: none; }}
   .violation-card {{
     background: #fff;
     border-radius: 24px;
-    padding: 2.2rem 2rem;
-    max-width: 380px;
+    padding: 1.5rem 1.8rem;
+    max-width: 370px;
     width: 90%;
     text-align: center;
     box-shadow: 0 20px 60px rgba(0,0,0,0.35);
     animation: scaleIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);
   }}
-  .violation-card .icon {{ font-size: 3rem; margin-bottom: 0.6rem; }}
+  .violation-card .icon {{ font-size: 2.5rem; margin-bottom: 0.3rem; }}
   .violation-card h2 {{
-    font-size: 1.35rem;
+    font-size: 1.25rem;
     font-weight: 900;
     color: #E74C3C;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
   }}
   .violation-card p {{
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: #555;
-    line-height: 1.6;
-    margin-bottom: 1.3rem;
+    line-height: 1.5;
+    margin-bottom: 0.8rem;
   }}
   .violation-card .prev-choice {{
     background: #FFF3F3;
     border: 2px solid #E74C3C;
     border-radius: 12px;
-    padding: 0.7rem 1rem;
-    font-size: 1.1rem;
+    padding: 0.5rem 1rem;
+    font-size: 1.05rem;
     font-weight: 900;
     color: #C0392B;
-    margin-bottom: 1.2rem;
+    margin-bottom: 0.8rem;
   }}
   .violation-btns {{
     display: flex;
@@ -283,24 +289,32 @@ def build_wheel_html(restaurants, colors):
   .center-btn:active {{ transform: translate(-50%, -50%) scale(0.95); }}
   .center-btn.disabled {{ opacity: 0.5; cursor: not-allowed; }}
 
-  /* ====== 結果卡片 ====== */
+  /* ====== 結果卡片（覆蓋在輪盤上） ====== */
   .result-card {{
-    margin-top: 1.5rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.4);
     padding: 1.8rem 2rem;
     border-radius: 20px;
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: #fff;
     text-align: center;
-    max-width: 400px;
-    width: 90%;
+    width: 320px;
     box-shadow: 0 12px 40px rgba(102,126,234,0.45);
-    animation: popUp 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);
-    display: none;
+    z-index: 25;
+    opacity: 0;
+    pointer-events: none;
+    transition: none;
+    display: block;
   }}
-  .result-card.show {{ display: block; }}
+  .result-card.show {{
+    animation: popUp 0.6s cubic-bezier(0.68,-0.55,0.265,1.55) forwards;
+    pointer-events: auto;
+  }}
   @keyframes popUp {{
-    0%   {{ transform: scale(0.4); opacity: 0; }}
-    100% {{ transform: scale(1);   opacity: 1; }}
+    0%   {{ transform: translate(-50%, -50%) scale(0.4); opacity: 0; }}
+    100% {{ transform: translate(-50%, -50%) scale(1);   opacity: 1; }}
   }}
   .result-card .big-emoji {{ font-size: 2.8rem; }}
   .result-card .label {{ font-size: 0.95rem; opacity: 0.8; margin-top: 0.3rem; }}
@@ -377,13 +391,13 @@ def build_wheel_html(restaurants, colors):
     <div class="outer-ring"></div>
     <canvas id="wheel" width="692" height="692"></canvas>
     <div class="center-btn" id="spinBtn" onclick="spin()">SPIN</div>
-  </div>
 
-  <div class="result-card" id="resultCard">
-    <div class="big-emoji">🎉</div>
-    <div class="label">今天就決定吃</div>
-    <div class="winner-name" id="winnerName"></div>
-    <a id="winnerLink" href="#" target="_blank">📍 開啟 Google Maps 導航</a>
+    <div class="result-card" id="resultCard">
+      <div class="big-emoji">🎉</div>
+      <div class="label">今天就決定吃</div>
+      <div class="winner-name" id="winnerName"></div>
+      <a id="winnerLink" href="#" target="_blank">📍 開啟 Google Maps 導航</a>
+    </div>
   </div>
 </div>
 
@@ -580,7 +594,7 @@ def main():
     """, unsafe_allow_html=True)
 
     wheel_html = build_wheel_html(RESTAURANTS, COLORS)
-    components.html(wheel_html, height=750, scrolling=False)
+    components.html(wheel_html, height=700, scrolling=False)
 
 
 if __name__ == "__main__":
