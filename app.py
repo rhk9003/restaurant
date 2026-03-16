@@ -115,6 +115,87 @@ def build_wheel_html(restaurants, colors):
     transform: translateY(0);
   }}
 
+  /* ====== 違規確認彈窗 ====== */
+  .violation-overlay {{
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(6px);
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+  }}
+  .violation-overlay.hidden {{ display: none; }}
+  .violation-card {{
+    background: #fff;
+    border-radius: 24px;
+    padding: 2.2rem 2rem;
+    max-width: 380px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    animation: scaleIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);
+  }}
+  .violation-card .icon {{ font-size: 3rem; margin-bottom: 0.6rem; }}
+  .violation-card h2 {{
+    font-size: 1.35rem;
+    font-weight: 900;
+    color: #E74C3C;
+    margin-bottom: 0.5rem;
+  }}
+  .violation-card p {{
+    font-size: 0.95rem;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 1.3rem;
+  }}
+  .violation-card .prev-choice {{
+    background: #FFF3F3;
+    border: 2px solid #E74C3C;
+    border-radius: 12px;
+    padding: 0.7rem 1rem;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #C0392B;
+    margin-bottom: 1.2rem;
+  }}
+  .violation-btns {{
+    display: flex;
+    gap: 0.8rem;
+    justify-content: center;
+  }}
+  .btn-obey {{
+    background: linear-gradient(135deg, #2ECC71, #27AE60);
+    color: #fff;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 900;
+    border-radius: 50px;
+    cursor: pointer;
+    font-family: 'Noto Sans TC', sans-serif;
+    box-shadow: 0 4px 15px rgba(46,204,113,0.4);
+    transition: all 0.2s;
+  }}
+  .btn-obey:hover {{ transform: translateY(-2px); }}
+  .btn-violate {{
+    background: linear-gradient(135deg, #E74C3C, #C0392B);
+    color: #fff;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 900;
+    border-radius: 50px;
+    cursor: pointer;
+    font-family: 'Noto Sans TC', sans-serif;
+    box-shadow: 0 4px 15px rgba(231,76,60,0.4);
+    transition: all 0.2s;
+  }}
+  .btn-violate:hover {{ transform: translateY(-2px); }}
+
   /* ====== 主畫面（同意前模糊） ====== */
   .main-content {{
     filter: blur(12px);
@@ -271,6 +352,21 @@ def build_wheel_html(restaurants, colors):
   </div>
 </div>
 
+<!-- ===== 違規確認彈窗 ===== -->
+<div class="violation-overlay hidden" id="violationOverlay">
+  <div class="violation-card">
+    <div class="icon">⚠️</div>
+    <h2>違反使用條款警告</h2>
+    <p>你已經同意「輪盤出現什麼就吃什麼」<br>命運已經為你選擇了：</p>
+    <div class="prev-choice" id="prevChoiceText"></div>
+    <p>確定要違反承諾，重新轉動嗎？ 🤨</p>
+    <div class="violation-btns">
+      <button class="btn-obey" onclick="obeyFate()">😇 乖乖去吃</button>
+      <button class="btn-violate" onclick="violateAndSpin()">😈 我就要重轉</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== 主畫面 ===== -->
 <div class="main-content" id="mainContent">
   <h1>🎰 午餐輪盤</h1>
@@ -326,36 +422,40 @@ function drawWheel() {{
     ctx.lineWidth = 2.5;
     ctx.stroke();
 
-    // 文字 — 沿半徑方向，逐字排列
+    // 文字 — 逐字沿半徑從外到內排列（直書效果）
     const midAngle = (startAngle + endAngle) / 2;
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(midAngle);
 
     const name = restaurants[i].name;
     const chars = name.split('');
     const maxChars = 7;
     const displayChars = chars.length > maxChars ? chars.slice(0, maxChars) : chars;
 
-    ctx.fillStyle = '#fff';
-    ctx.shadowColor = 'rgba(0,0,0,0.6)';
-    ctx.shadowBlur = 4;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
     const fontSize = 20;
-    ctx.font = '900 ' + fontSize + 'px "Noto Sans TC", sans-serif';
 
-    // 從外到內，逐字沿半徑排列
+    // 從外到內，逐字放置
     const startR = R * 0.88;
-    const charSpacing = fontSize * 1.15;
+    const charSpacing = fontSize * 1.2;
+
     for (let c = 0; c < displayChars.length; c++) {{
       const charR = startR - c * charSpacing;
-      if (charR < R * 0.22) break; // 太靠近中心就停
-      ctx.fillText(displayChars[c], charR, 0);
-    }}
+      if (charR < R * 0.2) break;
 
-    ctx.restore();
+      // 計算每個字的位置
+      const charX = cx + Math.cos(midAngle) * charR;
+      const charY = cy + Math.sin(midAngle) * charR;
+
+      ctx.save();
+      ctx.translate(charX, charY);
+      // 不旋轉 — 每個字都保持正立
+      ctx.fillStyle = '#fff';
+      ctx.shadowColor = 'rgba(0,0,0,0.7)';
+      ctx.shadowBlur = 5;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = '900 ' + fontSize + 'px "Noto Sans TC", sans-serif';
+      ctx.fillText(displayChars[c], 0, 0);
+      ctx.restore();
+    }}
   }}
 
   // 內圈漸層
@@ -373,9 +473,41 @@ drawWheel();
 // ===== 旋轉邏輯 =====
 let currentRotation = 0;
 let spinning = false;
+let hasResult = false;       // 是否已經有結果
+let currentWinner = null;    // 目前的結果
+let violationCount = 0;      // 違規次數
 
 function spin() {{
   if (spinning) return;
+
+  // 如果已經有結果，跳出違規警告
+  if (hasResult && currentWinner) {{
+    document.getElementById('prevChoiceText').textContent = '🏆 ' + currentWinner.name;
+    document.getElementById('violationOverlay').classList.remove('hidden');
+    return;
+  }}
+
+  doSpin();
+}}
+
+// 乖乖去吃 — 關掉彈窗，打開地圖
+function obeyFate() {{
+  document.getElementById('violationOverlay').classList.add('hidden');
+  if (currentWinner) {{
+    window.open(currentWinner.url, '_blank');
+  }}
+}}
+
+// 違規重轉
+function violateAndSpin() {{
+  violationCount++;
+  document.getElementById('violationOverlay').classList.add('hidden');
+  hasResult = false;
+  currentWinner = null;
+  doSpin();
+}}
+
+function doSpin() {{
   spinning = true;
   document.getElementById('spinBtn').classList.add('disabled');
   document.getElementById('resultCard').classList.remove('show');
@@ -391,8 +523,17 @@ function spin() {{
 
   setTimeout(() => {{
     const winner = restaurants[winnerIdx];
+    currentWinner = winner;
+    hasResult = true;
+
     document.getElementById('winnerName').textContent = winner.name;
     document.getElementById('winnerLink').href = winner.url;
+
+    // 如果有違規紀錄，加上恥辱標記
+    if (violationCount > 0) {{
+      document.getElementById('winnerName').textContent = winner.name + '（第 ' + (violationCount + 1) + ' 次轉）';
+    }}
+
     document.getElementById('resultCard').classList.add('show');
     spinning = false;
     document.getElementById('spinBtn').classList.remove('disabled');

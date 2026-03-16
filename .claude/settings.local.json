@@ -3,7 +3,11 @@
     "allow": [
       "Bash(curl -s -L -o /dev/null -w %{url_effective} https://maps.app.goo.gl/vFUdFkyY4Sfw8bKo7)",
       "Bash(iconv -f utf-8 -t utf-8)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(where streamlit:*)",
+      "Bash(pip show:*)",
+      "Bash(pip install:*)"
     ]
   }
 }
