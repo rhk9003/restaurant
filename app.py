@@ -332,6 +332,23 @@ def build_wheel_html(restaurants, colors):
     transition: background 0.2s;
   }}
   .result-card a:hover {{ background: rgba(255,255,255,0.35); }}
+  .respin-btn {{
+    margin-top: 0.6rem;
+    padding: 0.45rem 1.2rem;
+    background: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.7);
+    border: 1px dashed rgba(255,255,255,0.4);
+    border-radius: 30px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Noto Sans TC', sans-serif;
+    transition: all 0.2s;
+  }}
+  .respin-btn:hover {{
+    background: rgba(255,255,255,0.25);
+    color: #fff;
+  }}
 
   /* confetti */
   .confetti-container {{
@@ -397,6 +414,8 @@ def build_wheel_html(restaurants, colors):
       <div class="label">今天就決定吃</div>
       <div class="winner-name" id="winnerName"></div>
       <a id="winnerLink" href="#" target="_blank">📍 開啟 Google Maps 導航</a>
+      <br>
+      <button class="respin-btn" onclick="spin()">🔄 不要，再轉一次</button>
     </div>
   </div>
 </div>
