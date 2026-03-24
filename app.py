@@ -41,18 +41,17 @@ def build_wheel_html(restaurants, colors):
 
   /* ====== 同意彈窗 ====== */
   .overlay {{
-    position: absolute;
+    position: fixed;
     top: 0; left: 0;
     width: 100%;
-    min-height: 100vh;
     height: 100%;
     background: rgba(0,0,0,0.6);
     backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     z-index: 9999;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
-    padding-top: 10vh;
     animation: fadeIn 0.4s ease;
   }}
   .overlay.hidden {{ display: none; }}
@@ -109,6 +108,8 @@ def build_wheel_html(restaurants, colors):
     font-family: 'Noto Sans TC', sans-serif;
     box-shadow: 0 6px 20px rgba(231,76,60,0.4);
     transition: all 0.2s;
+    -webkit-tap-highlight-color: rgba(231,76,60,0.3);
+    touch-action: manipulation;
   }}
   .consent-btn:hover {{
     transform: translateY(-2px);
@@ -120,18 +121,17 @@ def build_wheel_html(restaurants, colors):
 
   /* ====== 違規確認彈窗 ====== */
   .violation-overlay {{
-    position: absolute;
+    position: fixed;
     top: 0; left: 0;
     width: 100%;
-    min-height: 100vh;
     height: 100%;
     background: rgba(0,0,0,0.65);
     backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     z-index: 9998;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
-    padding-top: 3vh;
     animation: fadeIn 0.3s ease;
   }}
   .violation-overlay.hidden {{ display: none; }}
@@ -185,6 +185,7 @@ def build_wheel_html(restaurants, colors):
     font-family: 'Noto Sans TC', sans-serif;
     box-shadow: 0 4px 15px rgba(46,204,113,0.4);
     transition: all 0.2s;
+    touch-action: manipulation;
   }}
   .btn-obey:hover {{ transform: translateY(-2px); }}
   .btn-violate {{
@@ -199,6 +200,7 @@ def build_wheel_html(restaurants, colors):
     font-family: 'Noto Sans TC', sans-serif;
     box-shadow: 0 4px 15px rgba(231,76,60,0.4);
     transition: all 0.2s;
+    touch-action: manipulation;
   }}
   .btn-violate:hover {{ transform: translateY(-2px); }}
 
@@ -379,7 +381,7 @@ def build_wheel_html(restaurants, colors):
       「我同意輪盤出現什麼<br>我就吃什麼」
     </div>
     <p>按下同意，即表示你願意<br>將午餐選擇權交給命運 🫡</p>
-    <button class="consent-btn" onclick="acceptConsent()">✅ 同意</button>
+    <button class="consent-btn" onclick="acceptConsent()" ontouchend="event.preventDefault(); acceptConsent();">✅ 同意</button>
   </div>
 </div>
 
@@ -392,8 +394,8 @@ def build_wheel_html(restaurants, colors):
     <div class="prev-choice" id="prevChoiceText"></div>
     <p>確定要違反承諾，重新轉動嗎？ 🤨</p>
     <div class="violation-btns">
-      <button class="btn-obey" onclick="obeyFate()">😇 乖乖去吃</button>
-      <button class="btn-violate" onclick="violateAndSpin()">😈 我就要重轉</button>
+      <button class="btn-obey" onclick="obeyFate()" ontouchend="event.preventDefault(); obeyFate();">😇 乖乖去吃</button>
+      <button class="btn-violate" onclick="violateAndSpin()" ontouchend="event.preventDefault(); violateAndSpin();">😈 我就要重轉</button>
     </div>
   </div>
 </div>
@@ -407,7 +409,7 @@ def build_wheel_html(restaurants, colors):
     <div class="pointer"></div>
     <div class="outer-ring"></div>
     <canvas id="wheel" width="692" height="692"></canvas>
-    <div class="center-btn" id="spinBtn" onclick="spin()">SPIN</div>
+    <div class="center-btn" id="spinBtn" onclick="spin()" ontouchend="event.preventDefault(); spin();">SPIN</div>
 
     <div class="result-card" id="resultCard">
       <div class="big-emoji">🎉</div>
